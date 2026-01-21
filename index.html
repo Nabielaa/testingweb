@@ -125,7 +125,7 @@ window.sendChat = async ()=>{
 
 <script>
 /* DISCORD WEBHOOK */
-const WEBHOOK_URL = "PASTE_DISCORD_WEBHOOK_URL";
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1463512329890173086/1vep4y4yMj5FOJA_LGD08UkdklYRggkkBYnMbJ85Mi02qSxuu7M8d5PXNj6XRFOpJSiA";
 
 function sendToDiscord(){
   const name=document.getElementById("dmName").value.trim()||"Anonymous";
@@ -160,5 +160,34 @@ function type(){
 go("home"); type();
 </script>
 
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // Firebase config (PUNYA KAMU)
+  const firebaseConfig = {
+    apiKey: "AIzaSyA0_VKg_GW208z3y4oPnDzkMrF-XW4uqWo",
+    authDomain: "muzascript-anonymouschat.firebaseapp.com",
+    projectId: "muzascript-anonymouschat",
+    storageBucket: "muzascript-anonymouschat.firebasestorage.app",
+    messagingSenderId: "528266453989",
+    appId: "1:528266453989:web:0ad8a9c2ea9d8dbfba450c"
+  };
+
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // EXPOSE ke window biar bisa dipakai tombol
+  window.db = db;
+  window.collection = collection;
+  window.addDoc = addDoc;
+  window.serverTimestamp = serverTimestamp;
+  window.onSnapshot = onSnapshot;
+  window.query = query;
+  window.orderBy = orderBy;
+  </script>
+
 </body>
 </html>
+

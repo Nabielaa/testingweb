@@ -11,11 +11,16 @@ body{background:#0f0f0f;color:#fff;min-height:100vh;display:flex;flex-direction:
 header{padding:15px;text-align:center;background:#151515;border-bottom:1px solid #222}
 header h1{color:#00ffaa;font-size:20px}
 main{flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
-.container{max-width:500px;width:100%;text-align:center}
-.typing{font-size:22px;min-height:30px;margin-bottom:30px}
-.buttons,.section{display:none;flex-direction:column;gap:15px}
+.container{max-width:520px;width:100%;text-align:center}
+.typing{font-size:22px;min-height:30px;margin-bottom:25px}
+.page{display:none;flex-direction:column;gap:12px}
 button,a{padding:12px;border-radius:8px;border:none;background:#00ffaa;color:#000;font-size:16px;cursor:pointer;text-decoration:none}
 button:hover,a:hover{background:#00cc88}
+input,textarea{padding:10px;border-radius:6px;border:none;outline:none}
+textarea{min-height:90px;resize:none}
+.chatbox{background:#151515;border-radius:8px;padding:10px;height:260px;overflow-y:auto;text-align:left}
+.msg{margin-bottom:6px}
+.name{color:#00ffaa;font-weight:bold}
 footer{text-align:center;padding:12px;background:#151515;border-top:1px solid #222;font-size:13px;color:#aaa}
 </style>
 </head>
@@ -27,25 +32,45 @@ footer{text-align:center;padding:12px;background:#151515;border-top:1px solid #2
 <main>
 <div class="container">
 
-<div class="typing" id="typing"></div>
-
-<div class="buttons" id="home">
-  <button onclick="showInfo()">Information</button>
-  <button onclick="showSocial()">Social Media</button>
+<!-- PAGE 1: HOME -->
+<div class="page" id="home">
+  <div class="typing" id="typing"></div>
+  <button onclick="go('info')">Information</button>
+  <button onclick="go('social')">Social</button>
 </div>
 
-<div class="section" id="info">
+<!-- PAGE 1.1: INFO -->
+<div class="page" id="info">
   <p style="opacity:.6">muzascript</p>
   <p>I am a script developer who focuses on creating and showcasing scripts.</p>
-  <button onclick="goHome()">⬅ Back</button>
+  <button onclick="go('home')">⬅ Back</button>
 </div>
 
-<div class="section" id="social">
+<!-- PAGE 2: SOCIAL -->
+<div class="page" id="social">
   <a href="https://discord.gg/R6fSpCX7W" target="_blank">Discord</a>
   <a href="https://youtube.com/@muzascriptroblox" target="_blank">YouTube</a>
   <a href="https://tiktok.com/@bluearmy_82" target="_blank">TikTok</a>
-  <a href="chat.html">➡ Global Chat</a>
-  <button onclick="goHome()">⬅ Back</button>
+  <button onclick="go('send')">📩 Send Message to MuzaScript</button>
+  <button onclick="go('chat')">💬 Global Chat</button>
+  <button onclick="go('home')">⬅ Back</button>
+</div>
+
+<!-- PAGE 3: SEND MESSAGE (DISCORD) -->
+<div class="page" id="send">
+  <input id="dmName" placeholder="Your name (optional)">
+  <textarea id="dmText" placeholder="Write your message..."></textarea>
+  <button onclick="sendToDiscord()">Send</button>
+  <button onclick="go('social')">⬅ Back</button>
+</div>
+
+<!-- PAGE 4: GLOBAL CHAT -->
+<div class="page" id="chat">
+  <input id="chatName" placeholder="Your name (default: Anonymous)">
+  <div class="chatbox" id="chatBox"></div>
+  <textarea id="chatText" placeholder="Type message..."></textarea>
+  <button onclick="sendChat()">Send</button>
+  <button onclick="go('social')">⬅ Back</button>
 </div>
 
 </div>
@@ -53,23 +78,86 @@ footer{text-align:center;padding:12px;background:#151515;border-top:1px solid #2
 
 <footer>©2026 muzascript • Roblox Scripter</footer>
 
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔴 GANTI DENGAN CONFIG FIREBASE KAMU */
+const firebaseConfig = {
+  PASTE_FIREBASE_CONFIG
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const chatBox=document.getElementById("chatBox");
+const chatName=document.getElementById("chatName");
+const chatText=document.getElementById("chatText");
+
+chatName.value = localStorage.getItem("chatName") || "";
+
+const q=query(collection(db,"messages"),orderBy("createdAt"));
+onSnapshot(q,snap=>{
+  chatBox.innerHTML="";
+  snap.forEach(doc=>{
+    const d=doc.data();
+    const div=document.createElement("div");
+    div.className="msg";
+    div.innerHTML=`<span class="name">${d.name}</span>: ${d.text}`;
+    chatBox.appendChild(div);
+  });
+  chatBox.scrollTop=chatBox.scrollHeight;
+});
+
+window.sendChat = async ()=>{
+  const text=chatText.value.trim();
+  if(!text) return;
+  const name=chatName.value.trim()||"Anonymous";
+  localStorage.setItem("chatName",name);
+  await addDoc(collection(db,"messages"),{
+    name,text,createdAt:serverTimestamp()
+  });
+  chatText.value="";
+};
+</script>
+
 <script>
-const text="Hello! welcome to my website!";
+/* DISCORD WEBHOOK */
+const WEBHOOK_URL = "PASTE_DISCORD_WEBHOOK_URL";
+
+function sendToDiscord(){
+  const name=document.getElementById("dmName").value.trim()||"Anonymous";
+  const text=document.getElementById("dmText").value.trim();
+  if(!text) return alert("Message empty");
+
+  fetch(WEBHOOK_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      content:`📩 **Message from Website**\n👤 ${name}\n\n${text}`
+    })
+  });
+
+  document.getElementById("dmText").value="";
+  alert("Message sent!");
+}
+
+/* NAVIGATION */
+function go(id){
+  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
+  document.getElementById(id).style.display="flex";
+}
+
+/* TYPING */
+const txt="Hello! welcome to my website!";
 let i=0;
 const typing=document.getElementById("typing");
-const home=document.getElementById("home");
-
 function type(){
-  if(i<text.length){
-    typing.innerHTML+=text.charAt(i++);
-    setTimeout(type,80);
-  }else home.style.display="flex";
+  if(i<txt.length){typing.innerHTML+=txt.charAt(i++);setTimeout(type,80);}
 }
-function hide(){document.querySelectorAll(".section").forEach(s=>s.style.display="none");home.style.display="none"}
-function showInfo(){hide();info.style.display="flex"}
-function showSocial(){hide();social.style.display="flex"}
-function goHome(){hide();home.style.display="flex"}
-type();
+go("home"); type();
 </script>
 
 </body>

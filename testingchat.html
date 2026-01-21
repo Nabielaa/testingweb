@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Global Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{margin:0;background:#0f0f0f;color:#fff;font-family:Arial;display:flex;flex-direction:column;height:100vh}
+header{padding:12px;text-align:center;background:#151515;border-bottom:1px solid #222}
+main{flex:1;display:flex;flex-direction:column;padding:10px}
+#messages{flex:1;overflow-y:auto;margin-bottom:10px}
+.msg{margin-bottom:8px}
+.name{color:#00ffaa;font-weight:bold}
+input,button{padding:10px;border-radius:6px;border:none}
+.controls{display:flex;gap:6px}
+button{background:#00ffaa;color:#000}
+button:hover{background:#00cc88}
+footer{text-align:center;padding:8px;background:#151515;font-size:12px;color:#aaa}
+</style>
+</head>
+
+<body>
+
+<header>💬 Global Anonymous Chat</header>
+
+<main>
+<div id="messages"></div>
+
+<input id="nameInput" placeholder="Your name (optional)">
+<input id="msgInput" placeholder="Write message...">
+
+<div class="controls">
+  <button onclick="send()">Send</button>
+  <button onclick="back()">⬅ Back</button>
+</div>
+</main>
+
+<footer>Realtime chat • Firebase</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "PASTE_APIKEY",
+  authDomain: "muzascript-anonymouschat.firebaseapp.com",
+  projectId: "muzascript-anonymouschat"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const messagesDiv=document.getElementById("messages");
+const nameInput=document.getElementById("nameInput");
+const msgInput=document.getElementById("msgInput");
+
+nameInput.value=localStorage.getItem("name")||"";
+
+function back(){location.href="index.html"}
+
+async function send(){
+  const text=msgInput.value.trim();
+  if(!text)return;
+  const name=nameInput.value.trim()||"Anonymous";
+  localStorage.setItem("name",name);
+
+  await addDoc(collection(db,"messages"),{
+    name,text,createdAt:serverTimestamp()
+  });
+
+  msgInput.value="";
+}
+
+const q=query(collection(db,"messages"),orderBy("createdAt"));
+onSnapshot(q,snap=>{
+  messagesDiv.innerHTML="";
+  snap.forEach(doc=>{
+    const d=doc.data();
+    const el=document.createElement("div");
+    el.className="msg";
+    el.innerHTML=`<span class="name">${d.name}</span>: ${d.text}`;
+    messagesDiv.appendChild(el);
+  });
+  messagesDiv.scrollTop=messagesDiv.scrollHeight;
+});
+</script>
+
+</body>
+</html>

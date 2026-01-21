@@ -161,37 +161,96 @@ go("home"); type();
 </script>
 
   <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  // =====================
+  // FIREBASE IMPORT (SATU VERSI)
+  // =====================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp,
+    onSnapshot,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA0_VKg_GW208z3y4oPnDzkMrF-XW4uqWo",
-  authDomain: "muzascript-anonymouschat.firebaseapp.com",
-  projectId: "muzascript-anonymouschat",
-  storageBucket: "muzascript-anonymouschat.firebasestorage.app",
-  messagingSenderId: "528266453989",
-  appId: "1:528266453989:web:0ad8a9c2ea9d8dbfba450c"
-};
+  // =====================
+  // FIREBASE CONFIG (PUNYA KAMU)
+  // =====================
+  const firebaseConfig = {
+    apiKey: "AIzaSyA0_VKg_GW208z3y4oPnDzkMrF-XW4uqWo",
+    authDomain: "muzascript-anonymouschat.firebaseapp.com",
+    projectId: "muzascript-anonymouschat",
+    storageBucket: "muzascript-anonymouschat.appspot.com",
+    messagingSenderId: "528266453989",
+    appId: "1:528266453989:web:0ad8a9c2ea9d8dbfba450c"
+  };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  // =====================
+  // INIT FIREBASE
+  // =====================
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-// expose ke window
-window.db = db;
-window.addDoc = addDoc;
-window.collection = collection;
-window.serverTimestamp = serverTimestamp;
+  // =====================
+  // EXPOSE KE WINDOW (WAJIB)
+  // =====================
+  window.db = db;
+  window.addDoc = addDoc;
+  window.collection = collection;
+  window.serverTimestamp = serverTimestamp;
+  window.onSnapshot = onSnapshot;
+  window.query = query;
+  window.orderBy = orderBy;
 
-console.log("🔥 Firebase ready");
+  console.log("🔥 Firebase CONNECTED");
   </script>
 
+  <script>
+function sendGlobalMessage() {
+  const name =
+    localStorage.getItem("username") ||
+    (localStorage.setItem("username", "Anonymous"),
+     "Anonymous");
+
+  const text = document.getElementById("chatText").value.trim();
+  if (!text) return alert("Pesan kosong");
+
+  window.addDoc(
+    window.collection(window.db, "messages"),
+    {
+      name: name,
+      text: text,
+      createdAt: window.serverTimestamp()
+    }
+  );
+
+  document.getElementById("chatText").value = "";
+}
+  </script>
+
+<script>
+window.onload = () => {
+  const q = window.query(
+    window.collection(window.db, "messages"),
+    window.orderBy("createdAt", "asc")
+  );
+
+  window.onSnapshot(q, snap => {
+    const box = document.getElementById("chatBox");
+    box.innerHTML = "";
+    snap.forEach(doc => {
+      const d = doc.data();
+      box.innerHTML += `<p><b>${d.name}</b>: ${d.text}</p>`;
+    });
+  });
+};
+</script>
+  
 </body>
 </html>
+
 
 
 

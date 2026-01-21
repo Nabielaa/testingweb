@@ -247,9 +247,31 @@ window.onload = () => {
   });
 };
 </script>
+
+  <script>
+function sendChat() {
+  const name =
+    document.getElementById("chatName").value.trim() || "Anonymous";
+
+  const text = document.getElementById("chatText").value.trim();
+  if (!text) return alert("Pesan kosong");
+
+  window.addDoc(
+    window.collection(window.db, "messages"),
+    {
+      name: name,
+      text: text,
+      createdAt: window.serverTimestamp()
+    }
+  );
+
+  document.getElementById("chatText").value = "";
+}
+  </script>
   
 </body>
 </html>
+
 
 
 

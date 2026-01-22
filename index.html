@@ -6,71 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-.bubble { background:red; }
-  .bubble { background:#333 !important; color:white !important; }
-  /* CHAT BOX */
-.chatbox {
-  background: linear-gradient(180deg, #0d0d0d, #121212);
-  border-radius: 14px;
-  padding: 12px;
-  height: 300px;
-  overflow-y: auto;
-  box-shadow: inset 0 0 20px rgba(0,255,170,.05);
-}
-
-/* BUBBLE */
-.bubble {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
-  padding: 8px 12px;
-  margin-bottom: 10px;
-  animation: fadeUp .25s ease;
-}
-
-/* NAME + TIME */
-.bubble .meta {
-  font-size: 11px;
-  opacity: .75;
-  margin-bottom: 4px;
-  color: #00ffaa;
-}
-
-/* MESSAGE TEXT */
-.bubble .text {
-  font-size: 14px;
-  line-height: 1.4;
-  color: #eee;
-  word-wrap: break-word;
-}
-
-/* INPUT AREA */
-textarea, input {
-  background: #1a1a1a;
-  color: #fff;
-}
-
-/* SCROLLBAR */
-.chatbox::-webkit-scrollbar {
-  width: 6px;
-}
-.chatbox::-webkit-scrollbar-thumb {
-  background: #00ffaa;
-  border-radius: 10px;
-}
-
-/* ANIMATION */
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-  
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
 body{background:#0f0f0f;color:#fff;min-height:100vh;display:flex;flex-direction:column}
 header{padding:15px;text-align:center;background:#151515;border-bottom:1px solid #222}
@@ -141,7 +76,7 @@ footer{text-align:center;padding:12px;background:#151515;border-top:1px solid #2
 </div>
 </main>
 
-<footer>©2026 muzascript • Roblox Scripter / Script Showcaser</footer>
+<footer>©2026 muzascript • Roblox Scripter</footer>
 
 <!-- FIREBASE -->
 <script type="module">
@@ -303,60 +238,22 @@ window.onload = () => {
   );
 
   window.onSnapshot(q, snap => {
-  const box = document.getElementById("chatBox");
-  box.innerHTML = "";
-
-  snap.forEach(doc => {
-    const d = doc.data();
-
-    const date = d.createdAt?.toDate();
-    let timeWIB = "";
-
-    if (date) {
-      timeWIB = new Intl.DateTimeFormat("id-ID", {
-        timeZone: "Asia/Jakarta",
-        hour: "2-digit",
-        minute: "2-digit",
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-      }).format(date);
-    }
-
-    box.innerHTML += `
-      <div class="bubble">
-        <div class="meta">${d.name} • ${timeWIB} WIB</div>
-        <div class="text">${d.text}</div>
-      </div>
-    `;
+    const box = document.getElementById("chatBox");
+    box.innerHTML = "";
+    snap.forEach(doc => {
+      const d = doc.data();
+      box.innerHTML += `<p><b>${d.name}</b>: ${d.text}</p>`;
+    });
   });
-
-  box.scrollTop = box.scrollHeight;
-});
+};
 </script>
 
   <script>
 function sendChat() {
-
-  // ===== ANTI SPAM 83 DETIK =====
-  const now = Date.now();
-  const lastSend = localStorage.getItem("lastSendTime");
-
-  if (lastSend && now - lastSend < 83000) {
-    const sisa = Math.ceil((83000 - (now - lastSend)) / 1000);
-    alert(`⏳ Tunggu ${sisa} detik sebelum kirim lagi`);
-    return;
-  }
-
-  localStorage.setItem("lastSendTime", now);
-  // ===== END ANTI SPAM =====
-
   const name =
     document.getElementById("chatName").value.trim() || "Anonymous";
 
-  const text =
-    document.getElementById("chatText").value.trim();
-
+  const text = document.getElementById("chatText").value.trim();
   if (!text) return alert("Pesan kosong");
 
   window.addDoc(
@@ -374,14 +271,3 @@ function sendChat() {
   
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-

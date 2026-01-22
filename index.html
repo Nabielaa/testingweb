@@ -238,14 +238,35 @@ window.onload = () => {
   );
 
   window.onSnapshot(q, snap => {
-    const box = document.getElementById("chatBox");
-    box.innerHTML = "";
-    snap.forEach(doc => {
-      const d = doc.data();
-      box.innerHTML += `<p><b>${d.name}</b>: ${d.text}</p>`;
-    });
+  const box = document.getElementById("chatBox");
+  box.innerHTML = "";
+
+  snap.forEach(doc => {
+    const d = doc.data();
+
+    let time = "";
+    if (d.createdAt) {
+      const date = d.createdAt.toDate();
+      time = new Intl.DateTimeFormat("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }).format(date);
+    }
+
+    box.innerHTML += `
+      <div class="msg">
+        <span class="time">[${time}]</span>
+        <b class="name">${d.name}</b>: ${d.text}
+      </div>
+    `;
   });
-};
+
+  box.scrollTop = box.scrollHeight;
+});
 </script>
 
   <script>
@@ -271,3 +292,4 @@ function sendChat() {
   
 </body>
 </html>
+

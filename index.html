@@ -218,7 +218,7 @@ function sendGlobalMessage() {
   if (!text) return alert("Pesan kosong");
 
   window.addDoc(
-    window.collection(window.db, "messages"),
+    window.collection(window.db, "messages_testing"),
     {
       name: name,
       text: text,
@@ -233,7 +233,7 @@ function sendGlobalMessage() {
 <script>
 window.onload = () => {
   const q = window.query(
-    window.collection(window.db, "messages"),
+    window.collection(window.db, "messages_testing"),
     window.orderBy("createdAt", "asc")
   );
 
@@ -278,7 +278,7 @@ function sendChat() {
   if (!text) return alert("Pesan kosong");
 
   window.addDoc(
-    window.collection(window.db, "messages"),
+    window.collection(window.db, "messages_testing"),
     {
       name: name,
       text: text,
@@ -292,4 +292,5 @@ function sendChat() {
   
 </body>
 </html>
+
 
